@@ -1,25 +1,115 @@
 version: '3.4'
 
 services:
-  catalogdb:
-    container_name: catalogdb
+
+  portainer:
+    container_name: portainer
     restart: always
-    ports: 
+    ports:
+      - "8000:8000"
+      - "9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+  
+  PgAdmin:
+    container_name: pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=azerty1234
+    restart: always
+    ports:
+        - "5050:80"
+    volumes:
+      - pgadmin_data:/root/.pgadmin 
+      
+       
+  DiscountDb:
+   container_name: Discount_postgre
+   environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=azerty1234
+      - POSTGRES_DB=DiscountDb
+   restart: always
+   ports:
+      - "5432:5432"
+   volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+
+  basketdb:
+    container_name: basket-redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  catalogdb:
+    container_name: catalog-mongo
+    restart: always
+    ports:
       - "27017:27017"
-    volumes: 
+    volumes:
       - mongo_data:/data/db
-  catalog.api:
-    container_name: catalog.api
+
+  basket.api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       - ASPNETCORE_HTTPS_PORTS=8081
-      - DatabaseSettings:ConnectionString=mongodb://catalogdb:27017
+      - ConnectionStrings__DiscountGrpcUrl=https://discount.grpc:8090
+      - ConnectionStrings__Redis=basketdb:6379
+    depends_on:
+      - basketdb
+      - discount.grpc
+    ports:
+      - "8084:8080"
+      - "8085:8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+
+
+  catalog.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - DatabaseSettings__ConnectionString=mongodb://catalogdb:27017
     depends_on:
       - catalogdb
     ports:
-      - "8080"
-      - "8081"
+      - "8082:8080"
+      - "8083:8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+
+  discount.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionStrings__Postgres=Host=DiscountDb;Port=5432;Username=admin;Password=azerty1234;Database=DiscountDb
+    depends_on:
+      - DiscountDb
+    ports:
+      - "8086:8080"
+      - "8088:8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+
+  discount.grpc:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8090
+      - ConnectionStrings__Postgres=Host=DiscountDb;Port=5432;Username=admin;Password=azerty1234;Database=DiscountDb
+    depends_on:
+      - DiscountDb
+    ports:
+      - "8089:8080"
+      - "8090:8081"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
