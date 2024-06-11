@@ -1,4 +1,5 @@
 ﻿using Application.Contracts.Persistence;
+using Application.Exceptions;
 using Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -15,7 +16,8 @@ namespace Application.Features.Orders.Commands.UpdateOrder
 
         public async Task<Unit> Handle(UpdateOrderCommand request, CancellationToken cancellationToken)
         {
-            var orderToUpdate = await _orderRepository.GetByIdAsync(request.Id) ?? throw new Exception($"Order with ID {request.Id} was not found.");
+            var orderToUpdate = await _orderRepository.GetByIdAsync(request.Id) 
+                ?? throw new NotFoundException(nameof(Order), request.Id);
             MapRequestToOrder(request, orderToUpdate);
 
             await _orderRepository.UpdateAsync(orderToUpdate);

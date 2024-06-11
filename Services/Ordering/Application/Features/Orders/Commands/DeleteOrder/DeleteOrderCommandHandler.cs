@@ -1,4 +1,5 @@
 ﻿using Application.Contracts.Persistence;
+using Application.Exceptions;
 using Domain.Entities;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -15,7 +16,8 @@ namespace Application.Features.Orders.Commands.DeleteOrder
 
         public async Task<Unit> Handle(DeleteOrderCommand request, CancellationToken cancellationToken)
         {
-            var orderToDelete = await _orderRepository.GetByIdAsync(request.Id) ?? throw new Exception($"Order with ID {request.Id} was not found.");
+            var orderToDelete = await _orderRepository.GetByIdAsync(request.Id) 
+                ?? throw new NotFoundException(nameof(Order), request.Id);
             await _orderRepository.DeleteAsync(orderToDelete);
             _logger.LogInformation("Order {OrderId} was successfully deleted.", orderToDelete.Id);
 

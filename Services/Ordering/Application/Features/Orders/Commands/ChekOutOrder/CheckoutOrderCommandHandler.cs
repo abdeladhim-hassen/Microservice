@@ -9,13 +9,22 @@ using Microsoft.Extensions.Logging;
 
 namespace Application.Features.Orders.Commands.CheckoutOrder
 {
-    public class CheckoutOrderCommandHandler(IOrderRepository orderRepository, IEmailService emailService, ILogger<CheckoutOrderCommandHandler> logger) : IRequestHandler<CheckoutOrderCommand, int>
+    public class CheckoutOrderCommandHandler(IOrderRepository orderRepository,
+        IEmailService emailService,
+        ILogger<CheckoutOrderCommandHandler> logger)
+        : IRequestHandler<CheckoutOrderCommand, int>
     {
-        private readonly IOrderRepository _orderRepository = orderRepository ?? throw new ArgumentNullException(nameof(orderRepository));
-        private readonly IEmailService _emailService = emailService ?? throw new ArgumentNullException(nameof(emailService));
-        private readonly ILogger<CheckoutOrderCommandHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly IOrderRepository _orderRepository = orderRepository 
+            ?? throw new ArgumentNullException(nameof(orderRepository));
 
-        public async Task<int> Handle(CheckoutOrderCommand request, CancellationToken cancellationToken)
+        private readonly IEmailService _emailService = emailService 
+            ?? throw new ArgumentNullException(nameof(emailService));
+
+        private readonly ILogger<CheckoutOrderCommandHandler> _logger = logger 
+            ?? throw new ArgumentNullException(nameof(logger));
+
+        public async Task<int> Handle(CheckoutOrderCommand request, 
+            CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request, nameof(request));
 
