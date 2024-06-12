@@ -10,8 +10,8 @@ using Microsoft.Extensions.Logging;
 namespace Application.Features.Orders.Commands.CheckoutOrder
 {
     public class CheckoutOrderCommandHandler(IOrderRepository orderRepository,
-        IEmailService emailService,
-        ILogger<CheckoutOrderCommandHandler> logger)
+                IEmailService emailService,
+                ILogger<CheckoutOrderCommandHandler> logger)
         : IRequestHandler<CheckoutOrderCommand, int>
     {
         private readonly IOrderRepository _orderRepository = orderRepository 
