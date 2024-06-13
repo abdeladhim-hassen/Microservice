@@ -23,7 +23,15 @@ services:
     volumes:
       - pgadmin_data:/root/.pgadmin 
       
-       
+  orderdb:
+    container_name: SqlServer
+    environment:
+        SA_PASSWORD: "azerty1234"
+        ACCEPT_EULA: "Y"
+    restart: always
+    ports:
+        - "1433:1433"    
+
   DiscountDb:
    container_name: Discount_postgre
    environment:
@@ -110,6 +118,21 @@ services:
     ports:
       - "8089:8080"
       - "8090:8081"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
+
+  ordering.api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ASPNETCORE_HTTPS_PORTS=8081
+      - ConnectionStrings__OrderingConnectionString=Server=orderdb;Database=OrderDb;User Id=sa;Password=azerty1234  
+    depends_on:
+      - orderdb       
+    ports:
+      - "8091:8080"
+      - "8092:8081"
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/home/app/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/home/app/.aspnet/https:ro
