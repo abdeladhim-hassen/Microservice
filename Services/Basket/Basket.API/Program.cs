@@ -1,7 +1,9 @@
+using Basket.API.Extensions;
 using Basket.API.GrpcServices;
 using Basket.API.Repositories.BasketRepository;
 using Discount.Grpc.Protos;
 using Microsoft.OpenApi.Models;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,12 +15,15 @@ builder.Services.AddStackExchangeRedisCache(options =>
 
 builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(o =>
 {
-    o.Address = new Uri(builder.Configuration.GetConnectionString("DiscountGrpcUrl") ?? throw new InvalidOperationException("Connection string is null."));
-}).ConfigurePrimaryHttpMessageHandler(() =>
+    o.Address = new Uri(builder.Configuration.GetConnectionString("DiscountGrpcUrl")
+        ?? throw new InvalidOperationException("Connection string is null."));
+})
+.ConfigurePrimaryHttpMessageHandler(() =>
 {
     var handler = new HttpClientHandler
     {
-        ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+        ServerCertificateCustomValidationCallback = HttpClientHandler
+        .DangerousAcceptAnyServerCertificateValidator
     };
     return handler;
 });
@@ -27,8 +32,12 @@ builder.Services.AddGrpcClient<DiscountProtoService.DiscountProtoServiceClient>(
 
 builder.Services.AddScoped<DiscountGrpcService>();
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+
+builder.Services.AddMassTransitWithRabbitMqTransport(builder.Configuration);
+
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Learn more about configuring Swagger/OpenA
+// PI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {

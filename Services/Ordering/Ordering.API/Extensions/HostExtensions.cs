@@ -6,8 +6,8 @@ namespace Ordering.API.Extensions
     public static class HostExtensions
     {
         public static IHost MigrateDatabase<TContext>(this IHost host,
-                                                      Action<TContext, IServiceProvider> seeder,
-                                                      int? retry = 0) where TContext : DbContext
+                                               Action<TContext, IServiceProvider> seeder,
+                                               int? retry = 0) where TContext : DbContext
         {
             int retryForAvailability = retry ?? 0;
 
@@ -55,5 +55,6 @@ namespace Ordering.API.Extensions
             context.Database.Migrate();
             seeder(context, services);
         }
+
     }
 }

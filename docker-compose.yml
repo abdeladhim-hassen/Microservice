@@ -1,13 +1,17 @@
 version: '3.4'
 
 services:
+
   portainer:
     image: portainer/portainer-ce
+
+  rabbitmq:
+   image: rabbitmq:management-alpine
   
   PgAdmin:
    image: dpage/pgadmin4
 
-  orderdb:
+  OrderingDb:
     image: mcr.microsoft.com/mssql/server:2022-latest
     
   DiscountDb:
@@ -49,10 +53,17 @@ services:
       context: .
       dockerfile: Services/Ordering/Ordering.API/Dockerfile
 
+  ocelotgateway.api:
+    image: ${DOCKER_REGISTRY-}ocelotgatewayapi
+    build:
+      context: .
+      dockerfile: Gateways/OcelotGateway.API/Dockerfile
+
 volumes:
   mongo_data:
   portainer_data: 
   postgres_data:
   pgadmin_data:  
+
 
 
